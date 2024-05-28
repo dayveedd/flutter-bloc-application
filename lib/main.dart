@@ -1,48 +1,20 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:developer' as devtools show log;
+import 'package:learning_bloc/api/login_api.dart';
+import 'package:learning_bloc/api/notes_api.dart';
+import 'package:learning_bloc/bloc/actions.dart';
+import 'package:learning_bloc/bloc/app_bloc.dart';
+import 'package:learning_bloc/dialogues/generic_dialog.dart';
+import 'package:learning_bloc/dialogues/loading_screen.dart';
+import 'package:learning_bloc/models.dart';
+import 'package:learning_bloc/strings.dart';
+import 'package:learning_bloc/views/iterable_list_view.dart';
+import 'package:learning_bloc/views/login_view.dart';
 
-import 'bloc/bloc_actions.dart';
-import 'bloc/person.dart';
-import 'bloc/persons_bloc.dart';
-
-extension Log on Object {
-  void log() => devtools.log(toString());
-}
+import 'bloc/app_state.dart';
 
 void main() {
-  runApp(MaterialApp(
-    title: 'Flutter Demo',
-    theme: ThemeData(),
-    debugShowCheckedModeBanner: false,
-    home: BlocProvider(
-      create: (_) => PersonBloc(),
-      child: const MyHomePage(),
-    ),
-  ));
-}
-
-
-
-
-
-
-
-Future<Iterable<Person>> getPersons(String url) => HttpClient()
-    .getUrl(Uri.parse(url))
-    .then((req) => req.close())
-    .then((resp) => resp.transform(utf8.decoder).join())
-    .then((str) => json.decode(str) as List<dynamic>)
-    .then((list) => list.map((e) => Person.fromJson(e)));
-
-
-
-
-
-extension Subscript<T> on Iterable<T> {
-  T? operator [](int index) => length > index ? elementAt(index) : null;
+  runApp(const MyHomePage());
 }
 
 class MyHomePage extends StatelessWidget {
@@ -50,52 +22,71 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('application'),
+    return const MaterialApp(
+        debugShowCheckedModeBanner: false, home: HomePage(),);
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => AppBloc(
+        loginApi: LoginApi(),
+        notesApi: NotesApi(),
       ),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              TextButton(
-                  onPressed: () {
-                    context.read<PersonBloc>().add(
-                          const LoadPersonsAction(url: persons1Url, loader: getPersons),
-                        );
-                  },
-                  child: const Text('Load json #1')),
-              TextButton(
-                  onPressed: () {
-                    context.read<PersonBloc>().add(
-                          const LoadPersonsAction(url: persons1Ur2, loader: getPersons),
-                        );
-                  },
-                  child: const Text('Load json #2')),
-            ],
-          ),
-          BlocBuilder<PersonBloc, FetchResult?>(
-            buildWhen: (previousResult, currentResult) {
-              return previousResult?.persons != currentResult?.persons;
-            },
-            builder: ((context, fetchResult) {
-              fetchResult?.log();
-              final persons = fetchResult?.persons;
-              if (persons == null) {
-                return const SizedBox();
-              }
-              return Expanded(
-                  child: ListView.builder(
-                      itemCount: persons.length,
-                      itemBuilder: (context, index) {
-                        final person = persons[index]!;
-                        return ListTile(
-                          title: Text(person.name),
-                        );
-                      }));
-            }),
-          )
-        ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(homePage),
+        ),
+        body: BlocConsumer<AppBloc, AppState>(
+          listener: (context, appState) {
+            // loading screen
+            if (appState.isLoading) {
+              LoadingScreen.instance().show(context: context, text: pleaseWait);
+            } else {
+              LoadingScreen.instance().hide();
+            }
+            // display errors in appstate
+            final loginError = appState.loginErrors;
+            if (loginError != null) {
+              showGenericDialog<bool>(
+                context: context,
+                title: loginErrorDialogTitle,
+                content: loginErrorDialogContent,
+                optionsBuilder: () => {ok: true},
+              );
+            }
+            // if we are logged in but have no fetched notes, fetch them
+            if (appState.isLoading == false &&
+                appState.loginErrors == null &&
+                appState.loginHandle == const LoginHandle.fooBar() &&
+                appState.fetchedNotes == null) {
+              context.read<AppBloc>().add(const LoadNotesAction());
+            }
+          },
+          builder: (context, appState) {
+            final notes = appState.fetchedNotes;
+            if (notes == null) {
+              return LoginView(
+                onLogginTapped: ((email, password) {
+                  context
+                      .read<AppBloc>()
+                      .add(LoginAction(email: email, password: password));
+                }),
+              );
+            } else {
+              return notes.toListView();
+            }
+          },
+        ),
       ),
     );
   }
