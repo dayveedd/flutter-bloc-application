@@ -19,6 +19,7 @@ class LoginView extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Log in'),
+        backgroundColor: Colors.blue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -39,7 +40,7 @@ class LoginView extends HookWidget {
               ),
               keyboardAppearance: Brightness.dark,
               obscureText: true,
-              obscuringCharacter: '🧿',
+              //obscuringCharacter: '🧿',
             ),
             TextButton(
               onPressed: () {

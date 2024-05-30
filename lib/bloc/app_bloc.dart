@@ -99,7 +99,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
       },
     );
     // log user out
-    on<AppEventLogin>(
+    on<AppEventLogOut>(
       (event, emit) async {
         // start loading
         emit(

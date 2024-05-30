@@ -18,6 +18,7 @@ class RegisterView extends HookWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue,
         title: const Text('Register'),
       ),
       body: Padding(
@@ -39,7 +40,7 @@ class RegisterView extends HookWidget {
               ),
               keyboardAppearance: Brightness.dark,
               obscureText: true,
-              obscuringCharacter: '🧿',
+              //obscuringCharacter: '🧿',
             ),
             TextButton(
               onPressed: () {
@@ -49,7 +50,7 @@ class RegisterView extends HookWidget {
                     .read<AppBloc>()
                     .add(AppEventRegister(email: email, password: password));
               },
-              child: const Text('Log in'),
+              child: const Text('Register'),
             ),
             TextButton(
               onPressed: () {                

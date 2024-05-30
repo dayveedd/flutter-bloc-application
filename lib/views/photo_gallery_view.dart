@@ -18,6 +18,7 @@ class PhotoGalleryView extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Photo Gallery'),
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
             onPressed: () async {
