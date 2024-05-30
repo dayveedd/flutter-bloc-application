@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-typedef DialogOptionsBuilder<T> = Map<String, T?> Function();
+typedef DialogOptionBuilder<T> = Map<String, T?> Function();
 
 Future<T?> showGenericDialog<T>({
   required BuildContext context,
   required String title,
   required String content,
-  required DialogOptionsBuilder optionsBuilder,
+  required DialogOptionBuilder optionsBuilder,
 }) {
   final options = optionsBuilder();
-  return showDialog<T?>(
+  return showDialog<T>(
     context: context,
     builder: (context) {
       return AlertDialog(
@@ -25,7 +25,7 @@ Future<T?> showGenericDialog<T>({
                   Navigator.of(context).pop();
                 }
               },
-              child: Text(optionTitle));
+              child: Text(optionTitle),);
         }).toList(),
       );
     },

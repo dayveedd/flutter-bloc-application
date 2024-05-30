@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:learning_bloc/dialogues/loading_screen_controller.dart';
+import 'package:learning_bloc/loading/loading_screen_controller.dart';
 
 class LoadingScreen {
   // singleton pattern
@@ -18,7 +18,7 @@ class LoadingScreen {
     if (_controller?.update(text) ?? false) {
       return;
     } else {
-      _controller = _showOverlay(context: context, text: text);
+      _controller = _showOverLay(context: context, text: text);
     }
   }
 
@@ -27,13 +27,14 @@ class LoadingScreen {
     _controller = null;
   }
 
-  LoadingScreenController _showOverlay({
+  LoadingScreenController _showOverLay({
     required BuildContext context,
     required String text,
   }) {
     final _text = StreamController<String>();
     _text.add(text);
 
+    // get the size
     final state = Overlay.of(context);
     final renderBox = context.findRenderObject() as RenderBox;
     final size = renderBox.size;
@@ -46,7 +47,7 @@ class LoadingScreen {
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: size.width * 0.8,
-                maxHeight: size.height * 0.0,
+                maxHeight: size.height * 0.8,
                 minWidth: size.width * 0.5,
               ),
               decoration: BoxDecoration(
@@ -54,7 +55,7 @@ class LoadingScreen {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -79,7 +80,7 @@ class LoadingScreen {
                             return Container();
                           }
                         },
-                      ),
+                      )
                     ],
                   ),
                 ),
